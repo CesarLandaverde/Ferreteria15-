@@ -11,55 +11,48 @@ loginController.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    let userFound; // Guardar el usuario encontrado
-    let userType; // Guardar el tipo de usuario
+    let userFound;
+    let userType;
 
-    // Admin, Empleados y Clientes
     if (email === config.admin.email && password === config.admin.password) {
       userType = "admin";
       userFound = { _id: "admin" };
     } else {
-      //Empleado
       userFound = await employeesModel.findOne({ email });
       userType = "employee";
-
-      //Cliente
       if (!userFound) {
         userFound = await clientModel.findOne({ email });
         userType = "client";
       }
     }
 
-    // Si no encuentra el usuario en ningun lado
     if (!userFound) {
-      return res.json({ message: "user not found" });
+      return res.status(401).json({ message: "user not found" });
     }
 
-    // Desincriptar la contraseña si no es admin
     if (userType !== "admin") {
-      const isMatch = bcryptjs.compare(password, userFound.password);
+      const isMatch = await bcryptjs.compare(password, userFound.password);
       if (!isMatch) {
-        res.json({ message: "Invalid password" });
+        return res.status(401).json({ message: "Invalid password" });
       }
     }
 
-    //TOKEN
     jsonwebtoken.sign(
-      //1- ¿que voy a guardar?
       { id: userFound._id, userType },
-      //2- secreto
       config.JWT.secret,
-      //3- ¿cuando expira?
       { expiresIn: config.JWT.expires },
-      //4- función flecha
       (error, token) => {
-        if (error) console.log("error" + error);
-        res.cookie("authToken", token);
-        res.json({ message: "login successful" });
+        if (error) {
+          console.log("error" + error);
+          return res.status(500).json({ message: "Token generation error" });
+        }
+        res.cookie("authToken", token, { httpOnly: true, sameSite: "lax" });
+        return res.json({ message: "login successful" });
       }
     );
   } catch (error) {
     console.log("error" + error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 

@@ -14,10 +14,17 @@ import recoveryPasswordRoutes from "./src/routes/recoveryPassword.js";
 import providersRoutes from "./src/routes/providers.js";
 import brandRoutes from "./src/routes/brand.js";
 import { validateAuthToken } from "./src/middlewares/validateAuthToken.js";
+import cors from "cors";
 
 // Creo una constante que es igual a la libreria que importé
 const app = express();
-//s
+
+// Configuración de CORS
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'], // Permite ambos puertos
+  credentials: true
+}));
+
 //Que acepte datos en json
 app.use(express.json());
 // Para que postman guarde el token en una cookie
@@ -39,6 +46,11 @@ app.use("/api/registerClients", registerClientsRouter);
 app.use("/api/RecoveryPassword", recoveryPasswordRoutes);
 
 app.use("/api/providers",validateAuthToken(["admin","employee"]) ,providersRoutes);
+
+// Ruta de health check
+app.get('/api/products/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
 
 // Exporto la constante para poder usar express en otros archivos
 export default app;
