@@ -16,29 +16,40 @@ cloudinary.config({
 const brandController = {};
 
 brandController.getAllBrand = async (req, res) => {
-  const brand = await brandModel.find();
-  res.json(brand);
+  try {
+    const brand = await brandModel.find();
+    res.json(brand);
+  } catch (err) {
+    console.error("Error en getAllBrand:", err);
+    res.status(500).json({ message: "Error al obtener las marcas" });
+  }
 };
+
 
 //INSERT
 brandController.insertBrand = async (req, res) => {
-  const { name, year, slogan } = req.body;
-  let imageURL = "";
+  try {
+    const { name, year, slogan } = req.body;
+    let imageURL = "";
 
-  //subir la imagen a Cloudinary
-  if (req.file) {
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "public",
-      allowed_formats: ["jpg", "png", "jpeg"],
-    });
-    imageURL = result.secure_url;
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "public",
+        allowed_formats: ["jpg", "png", "jpeg"],
+      });
+      imageURL = result.secure_url;
+    }
+
+    const newBrand = new brandModel({ name, year, slogan, image: imageURL });
+    await newBrand.save();
+
+    res.json({ message: "brand saved" });
+  } catch (err) {
+    console.error("Error en insertBrand:", err);
+    res.status(500).json({ message: "Error al guardar la marca" });
   }
-  //Guardar el registro en la base de datos
-  const newBrand = new brandModel({ name, year, slogan, image: imageURL });
-  newBrand.save();
-
-  res.json({ message: "brand saved" });
 };
+
 
 //UPDATE
 brandController.putBrand = async (req, res) => {
