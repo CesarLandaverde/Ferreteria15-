@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL; // cambia según tu backend
+const API_URL = "http://localhost:5000/api/products";
 
 export function useProducts() {
   const [products, setProducts] = useState([]);
@@ -14,7 +14,7 @@ export function useProducts() {
       const data = await res.json();
       setProducts(data);
     } catch (err) {
-      setError("Error al cargar productos");
+      setError("Error al obtener productos");
     } finally {
       setLoading(false);
     }
@@ -26,6 +26,11 @@ export function useProducts() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(product),
     });
+
+    if (!res.ok) {
+      throw new Error("Error al crear producto");
+    }
+
     const newProduct = await res.json();
     setProducts((prev) => [...prev, newProduct]);
   };
@@ -36,13 +41,23 @@ export function useProducts() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updated),
     });
+
+    if (!res.ok) throw new Error("Error al actualizar producto");
+
     const updatedProduct = await res.json();
-    setProducts((prev) => prev.map(p => (p._id === id ? updatedProduct : p)));
+    setProducts((prev) =>
+      prev.map((p) => (p._id === id ? updatedProduct : p))
+    );
   };
 
   const deleteProduct = async (id) => {
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-    setProducts((prev) => prev.filter(p => p._id !== id));
+    const res = await fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) throw new Error("Error al eliminar producto");
+
+    setProducts((prev) => prev.filter((p) => p._id !== id));
   };
 
   useEffect(() => {
@@ -53,7 +68,6 @@ export function useProducts() {
     products,
     loading,
     error,
-    fetchProducts,
     createProduct,
     updateProduct,
     deleteProduct,

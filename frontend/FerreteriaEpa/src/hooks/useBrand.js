@@ -6,7 +6,7 @@ const useBrand = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const API_BASE =import.meta.env.VITE_API_URL  // Ajusta tu URL
+  const API_BASE = "http://localhost:5000/api/products"
 
   // GET - Obtener todas las marcas
   const getAllBrands = async () => {

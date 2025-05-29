@@ -1,47 +1,58 @@
-//Array de metodos (C R U D)
-const productsController = {};
 import productsModel from "../models/Products.js";
 
-// SELECT
+const productsController = {};
+
+// SELECT - Obtener todos los productos
 productsController.getProducts = async (req, res) => {
-  const products = await productsModel.find();
-  res.json(products);
-};
-
-// INSERT
-productsController.createProducts = async (req, res) => {
-  const { name, description, price, stock } = req.body;
-  const newProduct = new productsModel({ name, description, price, stock });
-  await newProduct.save();
-  res.json({ message: "product saved" });
-};
-
-// DELETE
-productsController.deleteProducts = async (req, res) => {
-  const deletedProduct = await productsModel.findByIdAndDelete(req.params.id);
-  if (!deletedProduct) {
-    return res.status(404).json({ message: "Producto no encontrado" });
+  try {
+    const products = await productsModel.find();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: "Error al obtener productos" });
   }
-  res.json({ message: "product deleted" });
 };
 
-// UPDATE
+// INSERT - Crear un producto nuevo
+productsController.createProducts = async (req, res) => {
+  try {
+    const { name, description, price, stock } = req.body;
+    const newProduct = new productsModel({ name, description, price, stock });
+    await newProduct.save();
+    res.status(201).json(newProduct); // ← Devolver el producto creado
+  } catch (err) {
+    res.status(500).json({ message: "Error al guardar el producto" });
+  }
+};
+
+// DELETE - Eliminar un producto
+productsController.deleteProducts = async (req, res) => {
+  try {
+    const deletedProduct = await productsModel.findByIdAndDelete(req.params.id);
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Producto no encontrado" });
+    }
+    res.json({ message: "Producto eliminado" });
+  } catch (err) {
+    res.status(500).json({ message: "Error al eliminar el producto" });
+  }
+};
+
+// UPDATE - Actualizar un producto
 productsController.updateProducts = async (req, res) => {
-  // Solicito todos los valores
-  const { name, description, price, stock } = req.body;
-  // Actualizo
-  await productsModel.findByIdAndUpdate(
-    req.params.id,
-    {
-      name,
-      description,
-      price,
-      stock,
-    },
-    { new: true }
-  );
-  // muestro un mensaje que todo se actualizo
-  res.json({ message: "product updated" });
+  try {
+    const { name, description, price, stock } = req.body;
+    const updatedProduct = await productsModel.findByIdAndUpdate(
+      req.params.id,
+      { name, description, price, stock },
+      { new: true }
+    );
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Producto no encontrado" });
+    }
+    res.status(200).json(updatedProduct); // ← Devolver el producto actualizado
+  } catch (err) {
+    res.status(500).json({ message: "Error al actualizar el producto" });
+  }
 };
 
 export default productsController;

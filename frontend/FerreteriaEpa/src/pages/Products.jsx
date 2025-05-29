@@ -11,7 +11,7 @@ const Products = () => {
     deleteProduct,
   } = useProducts();
 
-  const [form, setForm] = useState({ name: "", description: "", price: 0, stock: 0 });
+  const [form, setForm] = useState({ name: "", description: "", price: "", stock: "" });
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState(null);
 
@@ -22,17 +22,37 @@ const Products = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingId) {
-      await updateProduct(editingId, form);
-    } else {
-      await createProduct(form);
+    if (!form.name || !form.description || !form.price || !form.stock) return;
+
+    try {
+      if (editingId) {
+        await updateProduct(editingId, {
+          ...form,
+          price: Number(form.price),
+          stock: Number(form.stock),
+        });
+      } else {
+        await createProduct({
+          ...form,
+          price: Number(form.price),
+          stock: Number(form.stock),
+        });
+      }
+
+      setForm({ name: "", description: "", price: "", stock: "" });
+      setEditingId(null);
+    } catch (err) {
+      console.error("Error en el submit:", err);
     }
-    setForm({ name: "", description: "", price: 0, stock: 0 });
-    setEditingId(null);
   };
 
   const handleEdit = (product) => {
-    setForm(product);
+    setForm({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      stock: product.stock,
+    });
     setEditingId(product._id);
   };
 
@@ -41,7 +61,7 @@ const Products = () => {
   };
 
   const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+    (p?.name || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -51,45 +71,15 @@ const Products = () => {
       {loading && <p className="text-gray-600 mb-4">Cargando productos...</p>}
       {error && <p className="text-red-600 mb-4">{error}</p>}
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-6 rounded-2xl shadow-md mb-6">
-        <input
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          placeholder="Nombre"
-          className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          required
-        />
-        <input
-          name="description"
-          value={form.description}
-          onChange={handleChange}
-          placeholder="Descripción"
-          className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          required
-        />
-        <input
-          name="price"
-          type="number"
-          value={form.price}
-          onChange={handleChange}
-          placeholder="Precio"
-          className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          required
-        />
-        <input
-          name="stock"
-          type="number"
-          value={form.stock}
-          onChange={handleChange}
-          placeholder="Stock"
-          className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          required
-        />
-        <button
-          type="submit"
-          className="md:col-span-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200"
-        >
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-6 rounded-2xl shadow-md mb-6"
+      >
+        <input name="name" value={form.name} onChange={handleChange} placeholder="Nombre" required className="border p-2 rounded-lg" />
+        <input name="description" value={form.description} onChange={handleChange} placeholder="Descripción" required className="border p-2 rounded-lg" />
+        <input name="price" type="number" value={form.price} onChange={handleChange} placeholder="Precio" required className="border p-2 rounded-lg" />
+        <input name="stock" type="number" value={form.stock} onChange={handleChange} placeholder="Stock" required className="border p-2 rounded-lg" />
+        <button type="submit" className="md:col-span-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
           {editingId ? "Actualizar Producto" : "Crear Producto"}
         </button>
       </form>
@@ -100,12 +90,12 @@ const Products = () => {
           placeholder="Buscar producto..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full p-2 border rounded-lg"
         />
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full table-auto border border-gray-200 rounded-lg shadow-sm">
+        <table className="w-full table-auto border border-gray-200 rounded-lg">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
               <th className="p-3 text-left">Nombre</th>
@@ -123,16 +113,10 @@ const Products = () => {
                 <td className="p-3">${p.price}</td>
                 <td className="p-3">{p.stock}</td>
                 <td className="p-3 flex gap-2">
-                  <button
-                    className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg transition duration-200"
-                    onClick={() => handleEdit(p)}
-                  >
+                  <button onClick={() => handleEdit(p)} className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg">
                     Editar
                   </button>
-                  <button
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition duration-200"
-                    onClick={() => handleDelete(p._id)}
-                  >
+                  <button onClick={() => handleDelete(p._id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg">
                     Eliminar
                   </button>
                 </td>
