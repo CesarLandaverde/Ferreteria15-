@@ -20,10 +20,16 @@ import cors from "cors";
 const app = express();
 
 // Configuración de CORS
+const allowedOrigins = [
+  "https://ferreteria15.vercel.app",
+  "https://ferreteria15-rsq7-git-master-cesarlandaverdes-projects.vercel.app"
+];
+
 app.use(cors({
-  origin: ['https://ferreteria15-rsq7.vercel.app/'], // Permite ambos puertos
-  credentials: true
+  origin: allowedOrigins,
+  credentials: true 
 }));
+
 
 //Que acepte datos en json
 app.use(express.json());
