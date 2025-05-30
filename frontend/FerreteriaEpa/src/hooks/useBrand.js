@@ -6,7 +6,7 @@ const useBrand = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const API_BASE = "http://localhost:5000/api/products"
+  const API_BASE = "https://ferreteria15.onrender.com/api/products"
 
   // GET - Obtener todas las marcas
   const getAllBrands = async () => {
