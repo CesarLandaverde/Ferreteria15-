@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Trash2, Edit3, Plus, X, Check } from 'lucide-react';
 
-// Hook personalizado para manejar las reseñas
+const API_BASE = "https://ferreteria15.onrender.com/api";
+
+// Hook para reseñas
 const useReviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const API_BASE = import.meta.env.VITE_API_URL;
 
   const fetchReviews = async () => {
     try {
@@ -89,12 +90,11 @@ const useReviews = () => {
   return { reviews, loading, error, fetchReviews, createReview, updateReview, deleteReview };
 };
 
-// Hook personalizado para manejar clientes
+// Hook para clientes
 const useClients = () => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const API_BASE = import.meta.env.VITE_API_URL;
 
   const fetchClients = async () => {
     try {
