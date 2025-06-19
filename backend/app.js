@@ -13,6 +13,7 @@ import registerClientsRouter from "./src/routes/registerClients.js";
 import recoveryPasswordRoutes from "./src/routes/recoveryPassword.js";
 import providersRoutes from "./src/routes/providers.js";
 import brandRoutes from "./src/routes/brand.js";
+import tasksRoutes from "./src/routes/tasks.js";
 
 import cors from "cors";
 
@@ -53,6 +54,7 @@ app.use("/api/RecoveryPassword", recoveryPasswordRoutes);
 
 app.use("/api/providers",providersRoutes);
 app.use("/api/products/brands", brandRoutes);
+app.use("/api/tasks",tasksRoutes);
 
 
 // Ruta de health check
