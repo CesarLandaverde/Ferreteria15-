@@ -1,4 +1,3 @@
-// Importo todo lo de la libreria de Express
 import express from "express";
 import productsRoutes from "./src/routes/products.js";
 import customersRoutes from "./src/routes/customers.js";
@@ -14,10 +13,14 @@ import recoveryPasswordRoutes from "./src/routes/recoveryPassword.js";
 import providersRoutes from "./src/routes/providers.js";
 import brandRoutes from "./src/routes/brand.js";
 import tasksRoutes from "./src/routes/tasks.js";
-
 import cors from "cors";
 
-// Creo una constante que es igual a la libreria que importé
+// Swagger
+import swaggerUi from "swagger-ui-express";
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const swaggerDocument = require('./cesarlandaverde-a91-FerreteriaEpa15porciento-1.0.0-resolved.json');
+
 const app = express();
 
 // Configuración de CORS
@@ -28,39 +31,33 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: allowedOrigins,
-  credentials: true 
+  credentials: true
 }));
 
-///dlshfljdsf
-//Que acepte datos en json
 app.use(express.json());
-// Para que postman guarde el token en una cookie
 app.use(cookieParser());
 
-// Definir las rutas de las funciones que tendrá la página web
+// Definir rutas
 app.use("/api/products", productsRoutes);
 app.use("/api/customers", customersRoutes);
 app.use("/api/employee", employeeRoutes);
 app.use("/api/branches", branchesRoutes);
 app.use("/api/reviews", reviewRoutes);
-
 app.use("/api/registerEmployee", registerEmployeesRoutes);
 app.use("/api/login", loginRoute);
 app.use("/api/logout", logoutRoute);
-
 app.use("/api/registerClients", registerClientsRouter);
-
 app.use("/api/RecoveryPassword", recoveryPasswordRoutes);
-
-app.use("/api/providers",providersRoutes);
+app.use("/api/providers", providersRoutes);
 app.use("/api/products/brands", brandRoutes);
-app.use("/api/tasks",tasksRoutes);
+app.use("/api/tasks", tasksRoutes);
 
+// Swagger Docs
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Ruta de health check
+// Ruta health
 app.get('/api/products/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Exporto la constante para poder usar express en otros archivos
 export default app;
